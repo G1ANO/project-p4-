@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class User(db.Model):
-    _tablename_ = "users"
+    __tablename__ = "users"   # 🔹 double underscores
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
@@ -13,7 +13,7 @@ class User(db.Model):
     subscriptions = db.relationship("Subscription", back_populates="user")
 
 class Plan(db.Model):
-    _tablename_ = "plans"
+    __tablename__ = "plans"   # 🔹 double underscores
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
@@ -23,7 +23,7 @@ class Plan(db.Model):
     subscriptions = db.relationship("Subscription", back_populates="plan")
 
 class Subscription(db.Model):
-    _tablename_ = "subscriptions"
+    __tablename__ = "subscriptions"   # 🔹 double underscores
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
