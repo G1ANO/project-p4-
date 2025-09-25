@@ -17,9 +17,7 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 
-
-
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 class User(db.Model):
@@ -77,7 +75,7 @@ def register():
     if not name or not email or not password:
         return jsonify({"message": "All fields are required"}), 400
 
-    
+   
     existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         return jsonify({"message": "User already exists"}), 400
@@ -106,12 +104,11 @@ def login():
     if not user:
         return jsonify({"message": "Invalid credentials"}), 401
 
-    
+   
     if not check_password_hash(getattr(user, "password_hash", ""), password):
         return jsonify({"message": "Invalid credentials"}), 401
 
     return jsonify({"id": user.id, "name": user.username, "email": user.email}), 200
-
 
 @app.route("/plans", methods=["GET"])
 def get_plans():
