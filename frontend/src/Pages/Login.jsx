@@ -1,25 +1,53 @@
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom"; 
+import axios from "axios";
+
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate(); 
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:5000/login", {
+        email,
+        password,
+      });
+      console.log("Logged in user:", res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
+      setError("");
+
+      
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.error || "Login failed");
+    }
+  };
+
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-lg rounded-xl p-8 w-96">
-        <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
-        <form className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="border p-2 rounded-lg"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="border p-2 rounded-lg"
-          />
-          <button className="bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-            Login
-          </button>
-        </form>
-      </div>
+    <div className="login-container">
+      <form onSubmit={handleLogin}>
+        <h1>Login</h1>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Login</button>
+        {error && <p className="error">{error}</p>}
+
+  <Link to="/signup">Don't have an account? Sign up</Link>
+      </form> 
     </div>
   );
 }
-

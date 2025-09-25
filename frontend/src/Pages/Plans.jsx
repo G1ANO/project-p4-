@@ -1,32 +1,83 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+
 export default function Plans() {
+  const [plans, setPlans] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [message, setMessage] = useState("");
+
+  // Fetch plans and users when component mounts
+  useEffect(() => {
+    axios.get("http://localhost:5000/plans")
+      .then((res) => setPlans(res.data))
+      .catch((err) => console.error("Error fetching plans:", err));
+
+    axios.get("http://localhost:5000/users")
+      .then((res) => {
+        setUsers(res.data);
+        if (res.data.length > 0) {
+          setSelectedUser(res.data[0]); // auto-pick first user (Alice)
+        }
+      })
+      .catch((err) => console.error("Error fetching users:", err));
+  }, []);
+
+  const handleSubscribe = async (planId) => {
+    if (!selectedUser) {
+      setMessage("No user selected!");
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:5000/subscriptions", {
+        user_id: selectedUser.id,
+        plan_id: planId,
+      });
+      setMessage(
+        `✅ ${selectedUser.username} subscribed to plan ID ${planId} successfully!`
+      );
+    } catch (err) {
+      setMessage(err.response?.data?.error || "❌ Subscription failed");
+    }
+  };
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Available Plans</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 border rounded-xl shadow hover:shadow-lg">
-          <h2 className="text-xl font-semibold mb-2">Daily Plan</h2>
-          <p>Access for 24 hours</p>
-          <p className="mt-2 font-bold">$1</p>
-          <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-            Subscribe
-          </button>
+    <div className="plans-container">
+      <h1>Available Plans</h1>
+
+      {/* User selection dropdown */}
+      {users.length > 0 && (
+        <div className="user-select">
+          <label>Select User: </label>
+          <select
+            value={selectedUser?.id || ""}
+            onChange={(e) =>
+              setSelectedUser(users.find((u) => u.id === parseInt(e.target.value)))
+            }
+          >
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="p-6 border rounded-xl shadow hover:shadow-lg">
-          <h2 className="text-xl font-semibold mb-2">Weekly Plan</h2>
-          <p>Access for 7 days</p>
-          <p className="mt-2 font-bold">$5</p>
-          <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-            Subscribe
-          </button>
-        </div>
-        <div className="p-6 border rounded-xl shadow hover:shadow-lg">
-          <h2 className="text-xl font-semibold mb-2">Monthly Plan</h2>
-          <p>Access for 30 days</p>
-          <p className="mt-2 font-bold">$15</p>
-          <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-            Subscribe
-          </button>
-        </div>
+      )}
+
+      {message && <p className="message">{message}</p>}
+
+      <div className="plans-grid">
+        {plans.map((plan) => (
+          <div key={plan.id} className="plan-card">
+            <h2>{plan.name}</h2>
+            <p>Duration: {plan.duration_minutes} minutes</p>
+            <p>Price: ksh{plan.price}</p>
+            <button onClick={() => handleSubscribe(plan.id)}>
+              Subscribe
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
