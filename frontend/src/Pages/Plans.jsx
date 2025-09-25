@@ -7,17 +7,17 @@ export default function Plans() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState("");
 
-  // Fetch plans and users when component mounts
+  
   useEffect(() => {
-    axios.get("http://localhost:5000/plans")
+    axios.get("https://project-p4-20zj.onrender.com/plans")
       .then((res) => setPlans(res.data))
       .catch((err) => console.error("Error fetching plans:", err));
 
-    axios.get("http://localhost:5000/users")
+    axios.get("https://project-p4-20zj.onrender.com/users")
       .then((res) => {
         setUsers(res.data);
         if (res.data.length > 0) {
-          setSelectedUser(res.data[0]); // auto-pick first user (Alice)
+          setSelectedUser(res.data[0]); 
         }
       })
       .catch((err) => console.error("Error fetching users:", err));
@@ -30,7 +30,7 @@ export default function Plans() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/subscriptions", {
+      const res = await axios.post("https://project-p4-20zj.onrender.com/subscriptions", {
         user_id: selectedUser.id,
         plan_id: planId,
       });
@@ -46,7 +46,7 @@ export default function Plans() {
     <div className="plans-container">
       <h1>Available Plans</h1>
 
-      {/* User selection dropdown */}
+      
       {users.length > 0 && (
         <div className="user-select">
           <label>Select User: </label>

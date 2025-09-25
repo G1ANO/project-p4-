@@ -17,9 +17,9 @@ function Dashboard() {
     const userObj = JSON.parse(savedUser);
     setUser(userObj);
 
-    // Fetch subscriptions for this user
+   
     axios
-      .get(`http://localhost:5000/subscriptions/${userObj.id}`)
+      .get(`https://project-p4-20zj.onrender.com/subscriptions/${userObj.id}`)
       .then((res) => setSubscriptions(res.data))
       .catch((err) => console.error(err));
   }, [navigate]);

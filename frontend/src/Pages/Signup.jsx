@@ -16,12 +16,12 @@ function Signup() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/register", formData);
+      const res = await axios.post("https://project-p4-20zj.onrender.com/register", formData);
 
       if (res.status === 201) {
-        // Save user to localStorage
+        
         localStorage.setItem("user", JSON.stringify(res.data));
-        // Redirect to dashboard
+        
         navigate("/dashboard");
       }
     } catch (err) {

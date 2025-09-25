@@ -7,13 +7,13 @@ export default function Subscriptions() {
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) return;
 
-    fetch(`http://localhost:5000/subscriptions/${user.id}`)
+    fetch(`https://project-p4-20zj.onrender.com/subscriptions/${user.id}`)
       .then((res) => res.json())
       .then((data) => setSubscriptions(data));
   }, []);
 
   const cancelSubscription = async (subId) => {
-    await fetch(`http://localhost:5000/subscriptions/${subId}`, {
+    await fetch(`https://project-p4-20zj.onrender.com/subscriptions/${subId}`, {
       method: "DELETE",
     });
     setSubscriptions(subscriptions.filter((sub) => sub.id !== subId));
