@@ -3,21 +3,25 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URI", "sqlite:///app.db") 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
-# Enable CORS for frontend (React at port 5173)
+
+
+
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 
-# ---------------------------
-# MODELS
-# ---------------------------
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -38,9 +42,7 @@ class Subscription(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     ends_at = db.Column(db.DateTime)
 
-# ---------------------------
-# SCHEMAS
-# ---------------------------
+
 class PlanSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Plan
@@ -64,9 +66,6 @@ users_schema = UserSchema(many=True)
 subscription_schema = SubscriptionSchema()
 subscriptions_schema = SubscriptionSchema(many=True)
 
-# ---------------------------
-# ROUTES
-# ---------------------------
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -78,12 +77,12 @@ def register():
     if not name or not email or not password:
         return jsonify({"message": "All fields are required"}), 400
 
-    # Check if user already exists
+    
     existing_user = User.query.filter_by(email=email).first()
     if existing_user:
         return jsonify({"message": "User already exists"}), 400
 
-    # Hash password
+    
     hashed_password = generate_password_hash(password)
     new_user = User(username=name, email=email, password_hash=hashed_password)
     db.session.add(new_user)
@@ -107,7 +106,7 @@ def login():
     if not user:
         return jsonify({"message": "Invalid credentials"}), 401
 
-    # Safe check
+    
     if not check_password_hash(getattr(user, "password_hash", ""), password):
         return jsonify({"message": "Invalid credentials"}), 401
 
@@ -224,15 +223,13 @@ def get_dashboard(user_id):
 
     return jsonify(dashboard_data), 200
 
-# ---------------------------
-# INIT DB
-# ---------------------------
+
 @app.cli.command("init-db")
 def init_db():
     db.drop_all()
     db.create_all()
 
-    # Seed sample data
+    
     user1 = User(username="alice", email="alice@example.com", password_hash=generate_password_hash("password123"))
     user2 = User(username="bob", email="bob@example.com", password_hash=generate_password_hash("password123"))
     plan1 = Plan(name="Daily Pass", duration_minutes=1440, price=50)
@@ -243,8 +240,6 @@ def init_db():
 
     print("Database initialized with sample data.")
 
-# ---------------------------
-# MAIN
-# ---------------------------
+
 if __name__ == "__main__":
     app.run(debug=True)
