@@ -2,56 +2,92 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export default function Signup() {
-  const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+function Signup() {
+  const [formData, setFormData] = useState({ email: "", password: "", name: "" });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
-  const handleSignup = async (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
-      const res = await axios.post("http://localhost:5000/register", { username, email, password });
-      setSuccess("Signup successful! Redirecting to login...");
-      setError("");
-      setTimeout(() => navigate("/login"), 1500);
+      const res = await axios.post("http://localhost:5000/register", formData);
+
+      if (res.status === 201) {
+        // Save user to localStorage
+        localStorage.setItem("user", JSON.stringify(res.data));
+        // Redirect to dashboard
+        navigate("/dashboard");
+      }
     } catch (err) {
+      console.error(err);
       setError(err.response?.data?.error || "Signup failed");
-      setSuccess("");
     }
   };
 
   return (
-    <div className="signup-container">
-      <form onSubmit={handleSignup}>
-        <h1>Signup</h1>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Signup</button>
-        {error && <p className="error">{error}</p>}
-        {success && <p className="success">{success}</p>}
-      </form>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1 className="auth-title">Sign Up</h1>
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="name">Full Name</label>
+            <input
+              type="text"
+              name="name"
+              id="name"
+              placeholder="John Doe"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="auth-field">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="auth-field">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="********"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {error && <p className="error-message">{error}</p>}
+
+          <button type="submit" className="auth-btn signup-btn">
+            Create Account
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          Already have an account? <a href="/login">Log In</a>
+        </div>
+      </div>
     </div>
   );
 }
+
+export default Signup;
