@@ -46,7 +46,7 @@ POST /subscriptions   # Create subscription
 
 ## Deployment Links
 
-Frontend (Netlify): [https://darling-arithmetic-b02581.netlify.app/Frontend]
+Frontend (Netlify): [https://darling-arithmetic-b02581.netlify.app]
 
 Backend (Render): [https://project-p4-20zj.onrender.com]
 
