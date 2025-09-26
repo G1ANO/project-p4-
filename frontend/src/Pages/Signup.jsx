@@ -1,93 +1,126 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
-function Signup() {
-  const [formData, setFormData] = useState({ email: "", password: "", name: "" });
+export default function Signup() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) navigate("/dashboard");
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    try {
-      const res = await axios.post("https://project-p4-20zj.onrender.com/register", formData);
+    if (!username || !email || !password) {
+      setError("Please fill out all required fields.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-      if (res.status === 201) {
-        
-        localStorage.setItem("user", JSON.stringify(res.data));
-        
-        navigate("/dashboard");
-      }
+    try {
+      const res = await axios.post("http://localhost:5000/register", {
+        username,
+        email,
+        password,
+      });
+      // Save user and redirect (backend should return created user)
+      localStorage.setItem("user", JSON.stringify(res.data));
+      navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.error || "Signup failed");
+      const msg = err.response?.data?.error || "Signup failed — try again.";
+      setError(msg);
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1 className="auth-title">Sign Up</h1>
+        <h1 className="auth-title">Create account</h1>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="auth-field">
-            <label htmlFor="name">Full Name</label>
+            <label htmlFor="username">Username</label>
             <input
+              id="username"
+              name="username"
               type="text"
-              name="name"
-              id="name"
-              placeholder="John Doe"
-              value={formData.name}
-              onChange={handleChange}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
+              autoComplete="username"
             />
           </div>
 
           <div className="auth-field">
             <label htmlFor="email">Email</label>
             <input
-              type="email"
-              name="email"
               id="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={handleChange}
+              name="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
           </div>
 
           <div className="auth-field">
             <label htmlFor="password">Password</label>
             <input
-              type="password"
-              name="password"
               id="password"
-              placeholder="********"
-              value={formData.password}
-              onChange={handleChange}
+              name="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="new-password"
             />
           </div>
 
-          {error && <p className="error-message">{error}</p>}
+          <div className="auth-field">
+            <label htmlFor="confirm">Confirm password</label>
+            <input
+              id="confirm"
+              name="confirm"
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+              autoComplete="new-password"
+            />
+          </div>
+
+          {error && (
+            <div className="error-message" role="alert" aria-live="polite">
+              {error}
+            </div>
+          )}
 
           <button type="submit" className="auth-btn signup-btn">
-            Create Account
+            Create account
           </button>
         </form>
 
         <div className="auth-footer">
-          Already have an account? <a href="/login">Log In</a>
+          Already have an account? <Link to="/login">Sign in</Link>
         </div>
       </div>
     </div>
   );
 }
-
-export default Signup;

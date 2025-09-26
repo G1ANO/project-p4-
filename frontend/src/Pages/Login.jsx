@@ -27,9 +27,16 @@ function Login() {
       }
 
       const data = await response.json();
+
+      
+      if (!data.id) {
+        throw new Error("Login response missing user ID");
+      }
+
+     
       localStorage.setItem("user", JSON.stringify(data));
 
-      // Redirect to the user-specific dashboard
+      
       navigate(`/dashboard/${data.id}`);
     } catch (err) {
       setError(err.message);
@@ -41,9 +48,8 @@ function Login() {
       <header className="home-header">
         <h1>Welcome to SubTrackr</h1>
         <p>
-          Your one-stop solution for managing subscriptions. Manage your
-          subscriptions in one place. Track your active bundles, never miss a
-          renewal, and stay in control of your spending.
+          Your one-stop solution for managing subscriptions. Track your bundles,
+          never miss a renewal, and stay in control of your spending.
         </p>
         <ul>
           <li>Sign up for an account</li>
