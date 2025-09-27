@@ -8,26 +8,110 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmError, setConfirmError] = useState("");
   const navigate = useNavigate();
+
+  // Email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.(com|me|co\.ke|org|net|edu|gov|mil|int|info|biz|name|pro|aero|coop|museum)$/i;
+    return emailRegex.test(email);
+  };
+
+  // Password validation function
+  const validatePassword = (password) => {
+    if (password.length > 10) {
+      return "Password must not exceed 10 characters";
+    }
+
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+    if (!hasUppercase) {
+      return "Password must include at least one uppercase letter";
+    }
+    if (!hasLowercase) {
+      return "Password must include at least one lowercase letter";
+    }
+    if (!hasNumber && !hasSpecialChar) {
+      return "Password must include at least one number or special character";
+    }
+
+    return "";
+  };
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+
+    if (value && !validateEmail(value)) {
+      setEmailError("Email must be in format 'example@domain.com' with valid domain (.com, .me, .co.ke, etc.)");
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    if (value) {
+      const passwordValidationError = validatePassword(value);
+      setPasswordError(passwordValidationError);
+    } else {
+      setPasswordError("");
+    }
+
+    // Re-validate confirm password if it exists
+    if (confirm && value !== confirm) {
+      setConfirmError("Passwords do not match");
+    } else if (confirm) {
+      setConfirmError("");
+    }
+  };
+
+  const handleConfirmChange = (e) => {
+    const value = e.target.value;
+    setConfirm(value);
+
+    if (value && password !== value) {
+      setConfirmError("Passwords do not match");
+    } else {
+      setConfirmError("");
+    }
+  };
 
   
   useEffect(() => {
     const user = localStorage.getItem("user");
-    if (user) navigate("/dashboard");
+    if (user) navigate("/plans");
   }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !confirm) {
       setError("Please fill out all required fields.");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+
+    // Validate email
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
       return;
     }
+
+    // Validate password
+    const passwordValidationError = validatePassword(password);
+    if (passwordValidationError) {
+      setError(passwordValidationError);
+      return;
+    }
+
     if (password !== confirm) {
       setError("Passwords do not match.");
       return;
@@ -41,7 +125,7 @@ export default function Signup() {
       });
       // Save user and redirect (backend should return created user)
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      navigate("/dashboard");
+      navigate("/plans");
     } catch (err) {
       const msg = err.response?.data?.error || "Signup failed — try again.";
       setError(msg);
@@ -73,24 +157,31 @@ export default function Signup() {
               id="email"
               name="email"
               type="email"
+              placeholder="example@domain.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               required
               autoComplete="email"
+              className={emailError ? "input-error" : ""}
             />
+            {emailError && <div className="validation-error">{emailError}</div>}
           </div>
 
           <div className="auth-field">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password (max 10 chars, A-z, 0-9 or special)</label>
             <input
               id="password"
               name="password"
               type="password"
+              placeholder="Max 10 chars, A-z, 0-9 or special"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               required
+              maxLength="10"
               autoComplete="new-password"
+              className={passwordError ? "input-error" : ""}
             />
+            {passwordError && <div className="validation-error">{passwordError}</div>}
           </div>
 
           <div className="auth-field">
@@ -99,11 +190,15 @@ export default function Signup() {
               id="confirm"
               name="confirm"
               type="password"
+              placeholder="Re-enter your password"
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              onChange={handleConfirmChange}
               required
+              maxLength="10"
               autoComplete="new-password"
+              className={confirmError ? "input-error" : ""}
             />
+            {confirmError && <div className="validation-error">{confirmError}</div>}
           </div>
 
           {error && (
@@ -112,7 +207,11 @@ export default function Signup() {
             </div>
           )}
 
-          <button type="submit" className="auth-btn signup-btn">
+          <button
+            type="submit"
+            className={`auth-btn signup-btn ${emailError || passwordError || confirmError || !username || !email || !password || !confirm ? "button-disabled" : ""}`}
+            disabled={emailError || passwordError || confirmError || !username || !email || !password || !confirm}
+          >
             Create account
           </button>
         </form>
