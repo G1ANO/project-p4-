@@ -9,11 +9,11 @@ export default function Plans() {
 
   
   useEffect(() => {
-    axios.get("https://project-p4-20zj.onrender.com/plans")
+    axios.get("http://localhost:5000/plans")
       .then((res) => setPlans(res.data))
       .catch((err) => console.error("Error fetching plans:", err));
 
-    axios.get("https://project-p4-20zj.onrender.com/users")
+    axios.get("http://localhost:5000/users")
       .then((res) => {
         setUsers(res.data);
         if (res.data.length > 0) {
@@ -30,7 +30,7 @@ export default function Plans() {
     }
 
     try {
-      const res = await axios.post("https://project-p4-20zj.onrender.com/subscriptions", {
+      const res = await axios.post("http://localhost:5000/subscriptions", {
         user_id: selectedUser.id,
         plan_id: planId,
       });

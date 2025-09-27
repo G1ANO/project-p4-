@@ -12,7 +12,7 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch("https://project-p4-20zj.onrender.com/login", {
+      const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -37,7 +37,7 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data));
 
       
-      navigate(`/dashboard/${data.id}`);
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     }

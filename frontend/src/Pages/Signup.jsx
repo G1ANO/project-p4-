@@ -35,12 +35,12 @@ export default function Signup() {
 
     try {
       const res = await axios.post("http://localhost:5000/register", {
-        username,
+        name: username,
         email,
         password,
       });
       // Save user and redirect (backend should return created user)
-      localStorage.setItem("user", JSON.stringify(res.data));
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
     } catch (err) {
       const msg = err.response?.data?.error || "Signup failed — try again.";
