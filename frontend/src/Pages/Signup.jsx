@@ -13,13 +13,13 @@ export default function Signup() {
   const [confirmError, setConfirmError] = useState("");
   const navigate = useNavigate();
 
-  // Email validation function
+  
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.(com|me|co\.ke|org|net|edu|gov|mil|int|info|biz|name|pro|aero|coop|museum)$/i;
     return emailRegex.test(email);
   };
 
-  // Password validation function
+  
   const validatePassword = (password) => {
     if (password.length > 10) {
       return "Password must not exceed 10 characters";
@@ -65,7 +65,7 @@ export default function Signup() {
       setPasswordError("");
     }
 
-    // Re-validate confirm password if it exists
+    
     if (confirm && value !== confirm) {
       setConfirmError("Passwords do not match");
     } else if (confirm) {
@@ -99,13 +99,13 @@ export default function Signup() {
       return;
     }
 
-    // Validate email
+    
     if (!validateEmail(email)) {
       setError("Please enter a valid email address");
       return;
     }
 
-    // Validate password
+    
     const passwordValidationError = validatePassword(password);
     if (passwordValidationError) {
       setError(passwordValidationError);
@@ -118,12 +118,12 @@ export default function Signup() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/register", {
+      const res = await axios.post("http:
         name: username,
         email,
         password,
       });
-      // Save user and redirect (backend should return created user)
+      
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/plans");
     } catch (err) {
@@ -133,17 +133,20 @@ export default function Signup() {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h1 className="auth-title">Create account</h1>
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-header">
+          <h1>Sign Up</h1>
+          <p>Create your account to access WiFi plans</p>
+        </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          <div className="auth-field">
-            <label htmlFor="username">Username</label>
+          <div className="input-group">
             <input
               id="username"
               name="username"
               type="text"
+              placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -151,13 +154,12 @@ export default function Signup() {
             />
           </div>
 
-          <div className="auth-field">
-            <label htmlFor="email">Email</label>
+          <div className="input-group">
             <input
               id="email"
               name="email"
               type="email"
-              placeholder="example@domain.com"
+              placeholder="Enter your email (e.g., user@example.com)"
               value={email}
               onChange={handleEmailChange}
               required
@@ -167,13 +169,12 @@ export default function Signup() {
             {emailError && <div className="validation-error">{emailError}</div>}
           </div>
 
-          <div className="auth-field">
-            <label htmlFor="password">Password (max 10 chars, A-z, 0-9 or special)</label>
+          <div className="input-group">
             <input
               id="password"
               name="password"
               type="password"
-              placeholder="Max 10 chars, A-z, 0-9 or special"
+              placeholder="Password (max 10 chars, A-z, 0-9 or special)"
               value={password}
               onChange={handlePasswordChange}
               required
@@ -184,13 +185,12 @@ export default function Signup() {
             {passwordError && <div className="validation-error">{passwordError}</div>}
           </div>
 
-          <div className="auth-field">
-            <label htmlFor="confirm">Confirm password</label>
+          <div className="input-group">
             <input
               id="confirm"
               name="confirm"
               type="password"
-              placeholder="Re-enter your password"
+              placeholder="Confirm your password"
               value={confirm}
               onChange={handleConfirmChange}
               required
@@ -201,24 +201,23 @@ export default function Signup() {
             {confirmError && <div className="validation-error">{confirmError}</div>}
           </div>
 
-          {error && (
-            <div className="error-message" role="alert" aria-live="polite">
-              {error}
-            </div>
-          )}
+          {error && <p className="error">{error}</p>}
 
           <button
             type="submit"
-            className={`auth-btn signup-btn ${emailError || passwordError || confirmError || !username || !email || !password || !confirm ? "button-disabled" : ""}`}
             disabled={emailError || passwordError || confirmError || !username || !email || !password || !confirm}
+            className={emailError || passwordError || confirmError || !username || !email || !password || !confirm ? "button-disabled" : ""}
           >
-            Create account
+            Create Account
           </button>
         </form>
 
-        <div className="auth-footer">
-          Already have an account? <Link to="/login">Sign in</Link>
-        </div>
+        <p className="auth-footer">
+          Already have an account?{" "}
+          <a href="/login" className="auth-link">
+            Sign in here
+          </a>
+        </p>
       </div>
     </div>
   );

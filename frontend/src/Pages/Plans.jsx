@@ -9,7 +9,7 @@ export default function Plans() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get current user from localStorage
+    
     const savedUser = localStorage.getItem("user");
     if (!savedUser) {
       navigate("/login");
@@ -17,8 +17,8 @@ export default function Plans() {
     }
     setUser(JSON.parse(savedUser));
 
-    // Fetch plans
-    axios.get("http://localhost:5000/plans")
+    
+    axios.get("http:
       .then((res) => setPlans(res.data))
       .catch((err) => console.error("Error fetching plans:", err));
   }, [navigate]);
@@ -30,13 +30,13 @@ export default function Plans() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/subscriptions", {
+      const res = await axios.post("http:
         user_id: user.id,
         plan_id: planId,
       });
       setMessage("✅ Subscription successful! Check your subscriptions page.");
 
-      // Clear message after 3 seconds
+      
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {
       setMessage(err.response?.data?.error || "❌ Subscription failed");

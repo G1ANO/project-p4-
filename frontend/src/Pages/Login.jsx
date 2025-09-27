@@ -9,13 +9,12 @@ function Login() {
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
 
-  // Email validation function
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.(com|me|co\.ke|org|net|edu|gov|mil|int|info|biz|name|pro|aero|coop|museum)$/i;
     return emailRegex.test(email);
   };
 
-  // Password validation function
+  const validatePassword = (password) => {
   const validatePassword = (password) => {
     if (password.length > 10) {
       return "Password must not exceed 10 characters";
@@ -66,13 +65,11 @@ function Login() {
     e.preventDefault();
     setError("");
 
-    // Validate email
     if (!validateEmail(email)) {
       setError("Please enter a valid email address");
       return;
     }
 
-    // Validate password
     const passwordValidationError = validatePassword(password);
     if (passwordValidationError) {
       setError(passwordValidationError);
@@ -80,7 +77,7 @@ function Login() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch("http:
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -119,8 +116,6 @@ function Login() {
           <p>Enter your credentials to access your WiFi plans</p>
         </div>
 
-        <div className="auth-box">
-        <h2>Login</h2>
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="input-group">
             <input
@@ -164,7 +159,6 @@ function Login() {
             Sign up here
           </a>
         </p>
-      </div>
       </div>
     </div>
   );

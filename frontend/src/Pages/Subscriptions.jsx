@@ -16,7 +16,7 @@ export default function Subscriptions() {
     const userObj = JSON.parse(savedUser);
     setUser(userObj);
 
-    fetch(`http://localhost:5000/subscriptions/${userObj.id}`)
+    fetch(`http:
       .then((res) => res.json())
       .then((data) => setSubscriptions(data))
       .catch((err) => console.error("Error fetching subscriptions:", err));
@@ -24,7 +24,7 @@ export default function Subscriptions() {
 
   const cancelSubscription = async (subId) => {
     try {
-      await fetch(`http://localhost:5000/subscriptions/${subId}`, {
+      await fetch(`http:
         method: "DELETE",
       });
       setSubscriptions(subscriptions.filter((sub) => sub.id !== subId));
@@ -35,7 +35,7 @@ export default function Subscriptions() {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    // Dispatch a custom event to notify other components
+    
     window.dispatchEvent(new Event('userLogout'));
     navigate("/login");
   };

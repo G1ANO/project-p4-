@@ -16,10 +16,10 @@ export default function Nav() {
       }
     };
 
-    // Check user on mount and route changes
+    
     checkUser();
 
-    // Listen for logout events
+    
     const handleLogout = () => {
       setUser(null);
     };
