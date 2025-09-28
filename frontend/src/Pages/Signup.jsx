@@ -1,136 +1,62 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+const validationSchema = Yup.object({
+  username: Yup.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username must not exceed 20 characters")
+    .required("Username is required"),
+  email: Yup.string()
+    .email("Email must be in format 'example@domain.com'")
+    .matches(
+      /^[^\s@]+@[^\s@]+\.(com|me|co\.ke|org|net|edu|gov|mil|int|info|biz|name|pro|aero|coop|museum)$/i,
+      "Email must have a valid domain (.com, .me, .co.ke, etc.)"
+    )
+    .required("Email is required"),
+  password: Yup.string()
+    .max(10, "Password must not exceed 10 characters")
+    .matches(/[A-Z]/, "Password must include at least one uppercase letter")
+    .matches(/[a-z]/, "Password must include at least one lowercase letter")
+    .matches(/[\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must include at least one number or special character")
+    .required("Password is required"),
+  confirm: Yup.string()
+    .oneOf([Yup.ref('password'), null], "Passwords must match")
+    .required("Confirm password is required")
+});
 
 export default function Signup() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmError, setConfirmError] = useState("");
   const navigate = useNavigate();
 
-  
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.(com|me|co\.ke|org|net|edu|gov|mil|int|info|biz|name|pro|aero|coop|museum)$/i;
-    return emailRegex.test(email);
-  };
-
-  
-  const validatePassword = (password) => {
-    if (password.length > 10) {
-      return "Password must not exceed 10 characters";
-    }
-
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-
-    if (!hasUppercase) {
-      return "Password must include at least one uppercase letter";
-    }
-    if (!hasLowercase) {
-      return "Password must include at least one lowercase letter";
-    }
-    if (!hasNumber && !hasSpecialChar) {
-      return "Password must include at least one number or special character";
-    }
-
-    return "";
-  };
-
-  const handleEmailChange = (e) => {
-    const value = e.target.value;
-    setEmail(value);
-
-    if (value && !validateEmail(value)) {
-      setEmailError("Email must be in format 'example@domain.com' with valid domain (.com, .me, .co.ke, etc.)");
-    } else {
-      setEmailError("");
-    }
-  };
-
-  const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    setPassword(value);
-
-    if (value) {
-      const passwordValidationError = validatePassword(value);
-      setPasswordError(passwordValidationError);
-    } else {
-      setPasswordError("");
-    }
-
-    
-    if (confirm && value !== confirm) {
-      setConfirmError("Passwords do not match");
-    } else if (confirm) {
-      setConfirmError("");
-    }
-  };
-
-  const handleConfirmChange = (e) => {
-    const value = e.target.value;
-    setConfirm(value);
-
-    if (value && password !== value) {
-      setConfirmError("Passwords do not match");
-    } else {
-      setConfirmError("");
-    }
-  };
-
-  
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) navigate("/plans");
-  }, [navigate]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!username || !email || !password || !confirm) {
-      setError("Please fill out all required fields.");
-      return;
-    }
-
-    
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-
-    
-    const passwordValidationError = validatePassword(password);
-    if (passwordValidationError) {
-      setError(passwordValidationError);
-      return;
-    }
-
-    if (password !== confirm) {
-      setError("Passwords do not match.");
-      return;
-    }
-
+  const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      const res = await axios.post("http://localhost:5000/register", {
-        name: username,
-        email,
-        password,
+      const response = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.username,
+          email: values.email,
+          password: values.password
+        }),
       });
-      
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      navigate("/plans");
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+
+      const data = await response.json();
+      console.log("Registration successful:", data);
+      navigate("/login");
     } catch (err) {
-      const msg = err.response?.data?.error || "Signup failed — try again.";
-      setError(msg);
+      setStatus(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
+
+
 
   return (
     <div className="login-page">
@@ -140,77 +66,61 @@ export default function Signup() {
           <p>Create your account to access WiFi plans</p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          <div className="input-group">
-            <input
-              id="username"
-              name="username"
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-            />
-          </div>
+        <Formik
+          initialValues={{ username: "", email: "", password: "", confirm: "" }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting, status, errors, touched }) => (
+            <Form className="auth-form">
+              <div className="input-group">
+                <Field
+                  type="text"
+                  name="username"
+                  placeholder="Enter your username"
+                  className={errors.username && touched.username ? "input-error" : ""}
+                />
+                <ErrorMessage name="username" component="div" className="validation-error" />
+              </div>
 
-          <div className="input-group">
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Enter your email (e.g., user@example.com)"
-              value={email}
-              onChange={handleEmailChange}
-              required
-              autoComplete="email"
-              className={emailError ? "input-error" : ""}
-            />
-            {emailError && <div className="validation-error">{emailError}</div>}
-          </div>
+              <div className="input-group">
+                <Field
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email (e.g., user@example.com)"
+                  className={errors.email && touched.email ? "input-error" : ""}
+                />
+                <ErrorMessage name="email" component="div" className="validation-error" />
+              </div>
 
-          <div className="input-group">
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Password (max 10 chars, A-z, 0-9 or special)"
-              value={password}
-              onChange={handlePasswordChange}
-              required
-              maxLength="10"
-              autoComplete="new-password"
-              className={passwordError ? "input-error" : ""}
-            />
-            {passwordError && <div className="validation-error">{passwordError}</div>}
-          </div>
+              <div className="input-group">
+                <Field
+                  type="password"
+                  name="password"
+                  placeholder="Password (max 10 chars, A-z, 0-9 or special)"
+                  className={errors.password && touched.password ? "input-error" : ""}
+                />
+                <ErrorMessage name="password" component="div" className="validation-error" />
+              </div>
 
-          <div className="input-group">
-            <input
-              id="confirm"
-              name="confirm"
-              type="password"
-              placeholder="Confirm your password"
-              value={confirm}
-              onChange={handleConfirmChange}
-              required
-              maxLength="10"
-              autoComplete="new-password"
-              className={confirmError ? "input-error" : ""}
-            />
-            {confirmError && <div className="validation-error">{confirmError}</div>}
-          </div>
+              <div className="input-group">
+                <Field
+                  type="password"
+                  name="confirm"
+                  placeholder="Confirm your password"
+                  className={errors.confirm && touched.confirm ? "input-error" : ""}
+                />
+                <ErrorMessage name="confirm" component="div" className="validation-error" />
+              </div>
 
-          {error && <p className="error">{error}</p>}
+              {status && <p className="error">{status}</p>}
 
-          <button
-            type="submit"
-            disabled={emailError || passwordError || confirmError || !username || !email || !password || !confirm}
-            className={emailError || passwordError || confirmError || !username || !email || !password || !confirm ? "button-disabled" : ""}
-          >
-            Create Account
-          </button>
-        </form>
+              <button type="submit" disabled={isSubmitting} className="auth-button">
+                {isSubmitting ? "Creating Account..." : "Create Account"}
+              </button>
+            </Form>
+          )}
+        </Formik>
 
         <p className="auth-footer">
           Already have an account?{" "}

@@ -1,54 +1,57 @@
 # WiFi Portal Subscription Management System
 
-A modern full-stack web application for managing time-based WiFi access subscriptions. Built with Flask (Python) backend and React (JavaScript) frontend.
+A web application for managing time-based WiFi access subscriptions. Built with Flask (Python) backend and React (JavaScript) frontend.
 
-## 🚀 Features
+# Features
 
-### Core Functionality
-- **User Authentication**: Secure registration and login with password validation
-- **WiFi Plans**: Multiple time-based internet access plans
-- **Subscription Management**: Purchase, view, and cancel subscriptions
--
-### Security Features
+-User Authentication: Secure registration and login with Formik validation
+-WiFi Plans: Multiple time-based internet access plans
+-Subscription Management: Purchase, view, and cancel subscriptions
+-Real-time Validation: Client-side form validati0n
+-Formik Forms: Advanced form handling with Yup validation schemas
+-Database Relationships:
+  - One-to-Many relationships (User→Subscription, Plan→Subscription)
+  - Many-to-Many relationship (User↔Plan via UserPlanHistory)
+-Full CRUD Operations: Complete Create, Read, Update, Delete functionality
+-Database Migrations: Flask-Migrate for schema management
+
+# Security Features
 - Password hashing with Werkzeug
-- Email format validation with domain verification
-- Password strength requirements (uppercase, lowercase, number/special character)
+- Email format validation
+- Password strength requirements (uppercase, lowercase, number/special character, max 10 chars)
 - Protected routes and authentication middleware
 - CORS configuration for secure API access
 
-## 📋 Available Plans
+# Technology Stack
 
-| Plan | Duration | Price |
-|------|----------|-------|
-| 1 Hour | 60 minutes | KSh 15 |
-| 3 Hours | 180 minutes | KSh 25 |
-| 6 Hours | 360 minutes | KSh 50 |
-| 12 Hours | 720 minutes | KSh 100 |
+#  Backend
+- Flask: Python web framework
+- Flask-RESTful: REST API framework with Resource classes
+- Flask-Migrate: Database migration management
+- SQLAlchemy: Database ORM with relationship modeling
+- Marshmallow: Data serialization andvalidation
+- SQLite: Database (development)
+- Flask-CORS: Cross-origin resource sharing
+- Werkzeug: Password hashing and security
 
-## 🛠️ Technology Stack
+# Frontend
+- React: JavaScript UI library
+- React Router: Client-side routing
+- Formik: Advanced form handling and validation
+- Yup: Schema validation for forms
+- Vite: Build tool and development server
+- CSS: Styling
+- Axios/Fetch
 
-### Backend
-- **Flask**: Python web framework
-- **SQLAlchemy**: Database ORM
-- **Marshmallow**: Data serialization/validation
-- **SQLite**: Database (development)
-- **Flask-CORS**: Cross-origin resource sharing
-- **Werkzeug**: Password hashing
-
-### Frontend
-- **React**: JavaScript UI library
-- **React Router**: Client-side routing
-- **Vite**: Build tool and development server
-- **CSS3**: Modern styling with flexbox/grid
-- **Axios**: HTTP client for API requests
-
-## 📁 Project Structure
-
+# Project Structure
 ```
-wifi-portal/
 ├── backend/
-│   ├── app.py              # Main Flask application
+│   ├── app.py              # Main Flask-RESTful application
 │   ├── requirements.txt    # Python dependencies
+│   ├── migrations/         # Flask-Migrate database migrations
+│   │   ├── versions/       # Migration version files
+│   │   ├── alembic.ini     # Alembic configuration
+│   │   └── env.py          # Migration environment
 │   └── instance/
 │       └── app.db         # SQLite database
 ├── frontend/
@@ -56,26 +59,26 @@ wifi-portal/
 │   │   ├── components/
 │   │   │   └── Nav.jsx    # Navigation component
 │   │   ├── Pages/
-│   │   │   ├── Login.jsx  # Login page
-│   │   │   ├── Signup.jsx # Registration page
+│   │   │   ├── Login.jsx  # Formik login form
+│   │   │   ├── Signup.jsx # Formik registration form
 │   │   │   ├── Plans.jsx  # WiFi plans page
 │   │   │   └── Subscriptions.jsx # Subscription management
 │   │   ├── App.jsx        # Main React component
 │   │   ├── App.css        # Application styles
 │   │   └── main.jsx       # React entry point
-│   ├── package.json       # Node.js dependencies
+│   ├── package.json       # Node.js dependencies (includes Formik & Yup)
 │   └── vite.config.js     # Vite configuration
 └── README.md              # Project documentation
 ```
 
-## 🚀 Quick Start
+# Quick Start
 
-### Prerequisites
+# Prerequisites
 - Python 3.8+
 - Node.js 16+
 - npm or yarn
 
-### Backend Setup
+# Backend Setup
 
 1. **Navigate to backend directory**
    ```bash
@@ -87,17 +90,20 @@ wifi-portal/
    pip install -r requirements.txt
    ```
 
-3. **Initialize the database**
+3. **Initialize database migrations**
    ```bash
-   python app.py
+   flask db init
+   flask db migrate -m "Initial migration"
+   flask db upgrade
    ```
-   The database will be automatically created with sample plans.
 
 4. **Start the Flask server**
    ```bash
    python app.py
    ```
    Backend will run on `http://localhost:5000`
+
+   The database will be automatically created with sample plans and users.
 
 ### Frontend Setup
 
@@ -106,7 +112,7 @@ wifi-portal/
    cd frontend
    ```
 
-2. **Install Node.js dependencies**
+2. **Install Node.js dependencies** (includes Formik & Yup)
    ```bash
    npm install
    ```
@@ -115,7 +121,7 @@ wifi-portal/
    ```bash
    npm run dev
    ```
-   Frontend will run on `http://localhost:5173`
+   Frontend will run on `http://localhost:5174`
 
 ## 🧪 Test Credentials
 
@@ -126,74 +132,10 @@ The application comes with pre-configured test users:
 | `user1@gmail.com` | `User1!` | Test user with valid credentials |
 | `user2@gmail.com` | `Test2@` | Test user with valid credentials |
 
-## 🎯 Usage Guide
-
-### 1. User Registration/Login
-- Visit `http://localhost:5173`
-- Create account or login with test credentials
-- Real-time validation ensures proper email/password format
-
-### 2. Browse WiFi Plans
-- After login, navigate to Plans page
-- View available time-based internet access plans
-- Subscribe to any plan with one click
-
-### 3. Manage Subscriptions
-- Visit Subscriptions page to view active subscriptions
-- See purchase date, expiration time, and plan details
-- Cancel subscriptions if needed
-- Logout securely when done
-
-## 🔧 API Endpoints
-
-### Authentication
-- `POST /register` - User registration
-- `POST /login` - User login
-
-### Plans
-- `GET /plans` - Get all available plans
-
-### Subscriptions
-- `GET /subscriptions/<user_id>` - Get user subscriptions
-- `POST /subscriptions` - Create new subscription
-- `DELETE /subscriptions/<subscription_id>` - Cancel subscription
-
-### Users
-- `GET /users` - Get all users (development only)
-
-## 🎨 Design Features
+# License
 
 
-## 🔒 Security Considerations
+# Contributors
 
-- Passwords are hashed using Werkzeug's secure methods
-- Client-side validation prevents invalid data submission
-- Protected routes ensure authenticated access only
-- CORS properly configured for secure API communication
-- Input sanitization and validation on both frontend and backend
-
-## 🚀 Deployment
-
-### Production Considerations
-- Replace SQLite with PostgreSQL for production
-- Set up environment variables for database configuration
-- Configure proper CORS origins for production domains
-- Implement rate limiting and additional security measures
-- Set up SSL/HTTPS for secure communication
-
-### Environment Variables
-```bash
-DATABASE_URI=postgresql://username:password@host:port/database
-```
-
-## 📝 License
-
-
-## 👥 Contributors
-
-- **Ian Muthiani** - Full-stack development
-- **Donald Stephen** - Full-stack development
-
----
-
-**Note**: 
+-Ian Muthiani - Full-stack developer
+-Donald Kiarie- Full-stack developer
