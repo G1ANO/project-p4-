@@ -18,7 +18,7 @@ export default function Plans() {
     setUser(JSON.parse(savedUser));
 
     
-    axios.get("http:
+    axios.get("http://localhost:5000/plans")
       .then((res) => setPlans(res.data))
       .catch((err) => console.error("Error fetching plans:", err));
   }, [navigate]);
@@ -30,7 +30,7 @@ export default function Plans() {
     }
 
     try {
-      const res = await axios.post("http:
+      const res = await axios.post("http://localhost:5000/subscriptions", {
         user_id: user.id,
         plan_id: planId,
       });

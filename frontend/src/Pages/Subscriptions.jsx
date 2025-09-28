@@ -16,7 +16,7 @@ export default function Subscriptions() {
     const userObj = JSON.parse(savedUser);
     setUser(userObj);
 
-    fetch(`http:
+    fetch(`http://localhost:5000/subscriptions/${userObj.id}`)
       .then((res) => res.json())
       .then((data) => setSubscriptions(data))
       .catch((err) => console.error("Error fetching subscriptions:", err));
@@ -24,7 +24,7 @@ export default function Subscriptions() {
 
   const cancelSubscription = async (subId) => {
     try {
-      await fetch(`http:
+      await fetch(`http://localhost:5000/subscriptions/${subId}`, {
         method: "DELETE",
       });
       setSubscriptions(subscriptions.filter((sub) => sub.id !== subId));

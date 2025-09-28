@@ -15,7 +15,6 @@ function Login() {
   };
 
   const validatePassword = (password) => {
-  const validatePassword = (password) => {
     if (password.length > 10) {
       return "Password must not exceed 10 characters";
     }
@@ -77,7 +76,7 @@ function Login() {
     }
 
     try {
-      const response = await fetch("http:
+      const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

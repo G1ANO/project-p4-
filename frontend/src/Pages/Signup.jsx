@@ -118,7 +118,7 @@ export default function Signup() {
     }
 
     try {
-      const res = await axios.post("http:
+      const res = await axios.post("http://localhost:5000/register", {
         name: username,
         email,
         password,
