@@ -2,7 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { API_ENDPOINTS } from "../config";
+import { API_ENDPOINTS, apiCall } from "../config";
+import ApiDebug from "../components/ApiDebug";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -25,21 +26,10 @@ function Login() {
 
   const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      const response = await fetch(API_ENDPOINTS.LOGIN, {
+      const data = await apiCall(API_ENDPOINTS.LOGIN, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Invalid email or password");
-        } else {
-          throw new Error("Login failed. Please try again.");
-        }
-      }
-
-      const data = await response.json();
 
       if (!data.id) {
         throw new Error("Login response missing user ID");
@@ -48,7 +38,8 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data));
       navigate("/plans");
     } catch (err) {
-      setStatus(err.message);
+      console.error("Login error:", err);
+      setStatus(err.message || "Login failed. Please check if the backend server is running.");
     } finally {
       setSubmitting(false);
     }
@@ -58,6 +49,7 @@ function Login() {
 
   return (
     <div className="login-page">
+      <ApiDebug />
       <div className="company-branding">
         <h1 className="company-name">M-NET INTERNET SOLUTIONS</h1>
         <p className="company-tagline">Diversified global connection.</p>

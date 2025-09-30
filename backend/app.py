@@ -34,7 +34,8 @@ api = Api(app)
 allowed_origins = [
     "http://localhost:5173",  # Development frontend
     "http://localhost:3000",  # Alternative dev port
-    os.environ.get("FRONTEND_URL", ""),  # Production frontend URL
+    "https://project-p4-lovat.vercel.app",  # Production frontend
+    os.environ.get("FRONTEND_URL", ""),  # Additional frontend URL from env
 ]
 
 # Remove empty strings and add wildcard for development
@@ -42,7 +43,14 @@ allowed_origins = [origin for origin in allowed_origins if origin]
 if not os.environ.get("FRONTEND_URL"):
     allowed_origins.append("*")  # Allow all origins in development
 
-CORS(app, resources={r"/*": {"origins": allowed_origins}})
+CORS(app, resources={
+    r"/*": {
+        "origins": allowed_origins,
+        "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
 
 
 class User(db.Model):

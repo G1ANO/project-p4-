@@ -2,6 +2,21 @@
 
 A web application for managing time-based WiFi access subscriptions. Built with Flask (Python) backend and React (JavaScript) frontend.
 
+## 🚀 Live Demo
+
+**Frontend (React):** https://project-p4-lovat.vercel.app/
+**Backend API (Flask):** https://project-p4-yc0o.onrender.com/
+
+### Test Credentials:
+- **Email:** `user1@gmail.com` | **Password:** `User1!`
+- **Email:** `user2@gmail.com` | **Password:** `Test2@`
+
+### Quick Test:
+1. Visit the [login page](https://project-p4-lovat.vercel.app/login)
+2. Use test credentials above
+3. Browse plans and try subscribing
+4. Check subscriptions page
+
 # Features
 
 -User Authentication: Secure registration and login with Formik validation
@@ -131,6 +146,31 @@ The application comes with pre-configured test users:
  Email | Password
  user1@gmail.com | User1!
  user2@gmail.com | Test2@
+
+# Deployment Status
+
+## 🌐 Current Deployment
+
+| Service | Platform | URL | Status |
+|---------|----------|-----|--------|
+| **Frontend** | Vercel | https://project-p4-lovat.vercel.app/ | ✅ Live |
+| **Backend API** | Render | https://project-p4-yc0o.onrender.com/ | ✅ Live |
+| **Database** | Render PostgreSQL | Internal | ✅ Connected |
+
+### Deployment Configuration:
+- **Frontend:** React app built with Vite, deployed on Vercel
+- **Backend:** Flask API with PostgreSQL, deployed on Render
+- **CORS:** Configured to allow frontend domain
+- **Environment:** Production-ready with proper error handling
+
+## 🔧 Local Development vs Production
+
+| Feature | Local Development | Production |
+|---------|------------------|------------|
+| **Frontend URL** | http://localhost:5173 | https://project-p4-lovat.vercel.app |
+| **Backend URL** | http://localhost:5000 | https://project-p4-yc0o.onrender.com |
+| **Database** | SQLite (app.db) | PostgreSQL (Render) |
+| **CORS** | Allow all origins (*) | Specific domains only |
 
 # Production Deployment & WiFi Integration
 
