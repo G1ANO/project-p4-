@@ -2,7 +2,8 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { API_ENDPOINTS } from "../config";
+import { API_ENDPOINTS, apiCall } from "../config";
+import ApiDebug from "../components/ApiDebug";
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -32,9 +33,14 @@ export default function Signup() {
 
   const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      const response = await fetch(API_ENDPOINTS.REGISTER, {
+      console.log("Attempting registration with:", {
+        name: values.username,
+        email: values.email,
+        password: "***hidden***"
+      });
+
+      const data = await apiCall(API_ENDPOINTS.REGISTER, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: values.username,
           email: values.email,
@@ -42,16 +48,17 @@ export default function Signup() {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
-      }
-
-      const data = await response.json();
       console.log("Registration successful:", data);
-      navigate("/login");
+      setStatus("✅ Registration successful! Redirecting to login...");
+
+      // Delay navigation to show success message
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+
     } catch (err) {
-      setStatus(err.message);
+      console.error("Registration error:", err);
+      setStatus(err.message || "Registration failed. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -61,6 +68,7 @@ export default function Signup() {
 
   return (
     <div className="login-page">
+      <ApiDebug />
       <div className="company-branding">
         <h1 className="company-name">M-NET INTERNET SOLUTIONS</h1>
         <p className="company-tagline">Diversified global connection.</p>
