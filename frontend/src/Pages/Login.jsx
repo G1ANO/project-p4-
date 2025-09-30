@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { API_ENDPOINTS, apiCall } from "../config";
-import ApiDebug from "../components/ApiDebug";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -49,7 +48,6 @@ function Login() {
 
   return (
     <div className="login-page">
-      <ApiDebug />
       <div className="company-branding">
         <h1 className="company-name">M-NET INTERNET SOLUTIONS</h1>
         <p className="company-tagline">Diversified global connection.</p>
