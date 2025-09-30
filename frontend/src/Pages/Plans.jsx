@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config";
 
 export default function Plans() {
   const [plans, setPlans] = useState([]);
@@ -18,7 +19,7 @@ export default function Plans() {
     setUser(JSON.parse(savedUser));
 
     
-    axios.get("http://localhost:5000/plans")
+    axios.get(API_ENDPOINTS.PLANS)
       .then((res) => setPlans(res.data))
       .catch((err) => console.error("Error fetching plans:", err));
   }, [navigate]);
@@ -30,7 +31,7 @@ export default function Plans() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/subscriptions", {
+      const res = await axios.post(API_ENDPOINTS.SUBSCRIPTIONS, {
         user_id: user.id,
         plan_id: planId,
       });

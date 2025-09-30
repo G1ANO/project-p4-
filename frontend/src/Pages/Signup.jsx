@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { API_ENDPOINTS } from "../config";
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -31,7 +32,7 @@ export default function Signup() {
 
   const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      const response = await fetch("http://localhost:5000/register", {
+      const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

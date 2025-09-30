@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { API_ENDPOINTS } from "../config";
 
 const validationSchema = Yup.object({
   email: Yup.string()
@@ -24,7 +25,7 @@ function Login() {
 
   const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      const response = await fetch("http://localhost:5000/login", {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

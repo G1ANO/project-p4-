@@ -12,8 +12,17 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URI", "sqlite:///app.db")
+
+# Database configuration - PostgreSQL for production, SQLite for development
+if os.environ.get("DATABASE_URL"):
+    # Production: Use PostgreSQL from Render
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL").replace("postgres://", "postgresql://", 1)
+else:
+    # Development: Use SQLite
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -21,7 +30,19 @@ migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 api = Api(app)
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+# CORS configuration for production
+allowed_origins = [
+    "http://localhost:5173",  # Development frontend
+    "http://localhost:3000",  # Alternative dev port
+    os.environ.get("FRONTEND_URL", ""),  # Production frontend URL
+]
+
+# Remove empty strings and add wildcard for development
+allowed_origins = [origin for origin in allowed_origins if origin]
+if not os.environ.get("FRONTEND_URL"):
+    allowed_origins.append("*")  # Allow all origins in development
+
+CORS(app, resources={r"/*": {"origins": allowed_origins}})
 
 
 class User(db.Model):
