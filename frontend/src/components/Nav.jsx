@@ -31,6 +31,13 @@ export default function Nav() {
     };
   }, [location]);
 
+  // Don't show navigation on login and signup pages
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+  if (isAuthPage) {
+    return null; // Don't render navigation on auth pages
+  }
+
   return (
     <nav className="nav">
       <div className="nav-content">

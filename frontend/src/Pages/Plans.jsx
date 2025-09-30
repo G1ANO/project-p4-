@@ -36,11 +36,17 @@ export default function Plans() {
       });
       setMessage("✅ Subscription successful! Check your subscriptions page.");
 
-      
-      setTimeout(() => setMessage(""), 3000);
+
+      setTimeout(() => setMessage(""), 5000);
     } catch (err) {
-      setMessage(err.response?.data?.error || "❌ Subscription failed");
-      setTimeout(() => setMessage(""), 3000);
+      // Handle overlap error specifically
+      if (err.response?.status === 409) {
+        const errorData = err.response.data;
+        setMessage(`❌ ${errorData.message || errorData.error}`);
+      } else {
+        setMessage(err.response?.data?.error || "❌ Subscription failed");
+      }
+      setTimeout(() => setMessage(""), 8000); // Longer timeout for overlap messages
     }
   };
 

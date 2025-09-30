@@ -4,7 +4,7 @@ from flask_marshmallow import Marshmallow
 from flask_cors import CORS
 from flask_restful import Api, Resource
 from flask_migrate import Migrate
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 import os
@@ -12,12 +12,13 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URI", "sqlite:///app.db") 
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URI", "sqlite:///app.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
 api = Api(app)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -101,7 +102,7 @@ class RegisterResource(Resource):
         if existing_user:
             return {"message": "User already exists"}, 400
 
-        hashed_password = generate_password_hash(password)
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         new_user = User(username=name, email=email, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
@@ -124,7 +125,7 @@ class LoginResource(Resource):
         if not user:
             return {"message": "Invalid credentials"}, 401
 
-        if not check_password_hash(getattr(user, "password_hash", ""), password):
+        if not bcrypt.check_password_hash(user.password_hash, password):
             return {"message": "Invalid credentials"}, 401
 
         return {"id": user.id, "name": user.username, "email": user.email}, 200
@@ -148,7 +149,7 @@ class UsersResource(Resource):
         if 'email' in data:
             user.email = data['email']
         if 'password' in data:
-            user.password_hash = generate_password_hash(data['password'])
+            user.password_hash = bcrypt.generate_password_hash(data['password']).decode('utf-8')
 
         db.session.commit()
         return user_schema.dump(user), 200
@@ -178,7 +179,43 @@ class SubscriptionsResource(Resource):
             if not user or not plan:
                 return {"error": "Invalid user or plan"}, 400
 
+            # Check for existing active subscriptions that haven't expired
             now = datetime.now(timezone.utc)
+            existing_active_sub = Subscription.query.filter(
+                Subscription.user_id == user_id,
+                Subscription.status == "active",
+                Subscription.ends_at > now
+            ).first()
+
+            if existing_active_sub:
+                # Ensure both datetimes are timezone-aware for comparison
+                ends_at = existing_active_sub.ends_at
+                if ends_at.tzinfo is None:
+                    ends_at = ends_at.replace(tzinfo=timezone.utc)
+
+                # Calculate remaining time
+                remaining_time = ends_at - now
+                hours = int(remaining_time.total_seconds() // 3600)
+                minutes = int((remaining_time.total_seconds() % 3600) // 60)
+
+                time_str = ""
+                if hours > 0:
+                    time_str += f"{hours} hour{'s' if hours > 1 else ''}"
+                if minutes > 0:
+                    if time_str:
+                        time_str += f" and {minutes} minute{'s' if minutes > 1 else ''}"
+                    else:
+                        time_str = f"{minutes} minute{'s' if minutes > 1 else ''}"
+
+                return {
+                    "error": "You already have an active subscription",
+                    "message": f"Your current subscription expires in {time_str}. Please wait until it expires before subscribing to a new plan.",
+                    "current_subscription": {
+                        "expires_at": existing_active_sub.ends_at.isoformat(),
+                        "remaining_time": time_str
+                    }
+                }, 409  # Conflict status code
+
             ends_at = now + timedelta(minutes=plan.duration_minutes)
 
             sub = Subscription(
@@ -282,8 +319,8 @@ def init_db():
     db.create_all()
 
     # Create test users with valid credentials
-    user1 = User(username="user1", email="user1@gmail.com", password_hash=generate_password_hash("User1!"))
-    user2 = User(username="user2", email="user2@gmail.com", password_hash=generate_password_hash("Test2@"))
+    user1 = User(username="user1", email="user1@gmail.com", password_hash=bcrypt.generate_password_hash("User1!").decode('utf-8'))
+    user2 = User(username="user2", email="user2@gmail.com", password_hash=bcrypt.generate_password_hash("Test2@").decode('utf-8'))
 
     # Create WiFi plans as specified
     plan1 = Plan(name="1 Hour", duration_minutes=60, price=15)

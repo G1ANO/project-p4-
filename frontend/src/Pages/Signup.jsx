@@ -60,9 +60,18 @@ export default function Signup() {
 
   return (
     <div className="login-page">
+      <div className="company-branding">
+        <h1 className="company-name">M-NET INTERNET SOLUTIONS</h1>
+        <p className="company-tagline">Diversified global connection.</p>
+        <div className="company-contact">
+          <p>PO BOX 24-90102</p>
+          <p>2025mnetcare@proton.me</p>
+        </div>
+      </div>
+
       <div className="login-container">
         <div className="login-header">
-          <h1>Sign Up</h1>
+          <h2>Sign Up</h2>
           <p>Create your account to access WiFi plans</p>
         </div>
 
