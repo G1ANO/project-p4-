@@ -331,6 +331,22 @@ class UserPlanHistoryResource(Resource):
 
         return user_plan_history_schema.dump(history), 201
 
+# Root endpoint for API health check
+@app.route('/')
+def api_root():
+    return {
+        "message": "WiFi Portal API",
+        "version": "1.0.0",
+        "status": "running",
+        "endpoints": {
+            "register": "/register",
+            "login": "/login",
+            "plans": "/plans",
+            "subscriptions": "/subscriptions",
+            "users": "/users"
+        }
+    }
+
 # Register API routes
 api.add_resource(RegisterResource, '/register')
 api.add_resource(LoginResource, '/login')
